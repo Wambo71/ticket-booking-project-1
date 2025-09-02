@@ -1,16 +1,21 @@
-from sqlalchemy import Integer, Column, String , DateTime , ForeignKey
-from sqlalchemy.orm import declarative_base,relationship
-from sqlalchemy import datetime
+from sqlalchemy import Integer, Column, String , DateTime , ForeignKey,create_engine
+from sqlalchemy.orm import declarative_base,relationship,sessionmaker
+import datetime
 
 Base = declarative_base ()
 
+engine = create_engine("sqlite:///booking.db")
+Base.metadata.create_all(engine)
+session = sessionmaker(bind=engine)
+session=session()
+
 class User(Base):
-    __tablename__ = "Users"
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    phone = Column(Integer, nullble=False)
+    phone = Column(Integer, nullable=False)
 
     tickets = relationship("Ticket", back_populates="user")
 
@@ -34,5 +39,9 @@ class Ticket(Base):
     event_id = Column(Integer, ForeignKey("events.id"))
     booked_at = Column(DateTime, default=datetime.datetime.utcnow) 
 
-    events = relationship("Event",back_populates="tickets")  
-    users = relationship("User",back_populates="tickets")
+    event = relationship("Event",back_populates="tickets")  
+    user = relationship("User",back_populates="tickets")
+
+    
+# ✅ Create tables after models are defined
+Base.metadata.create_all(engine)
